@@ -1,1 +1,3 @@
 FROM ghcr.io/enhanceai/official-site-enterprise:1.0.0
+
+CMD ["nginx", "-g", "daemon off;"]
