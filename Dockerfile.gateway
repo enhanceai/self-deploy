@@ -1,0 +1,1 @@
+FROM ghcr.io/enhanceai/gateway:1.1.0
