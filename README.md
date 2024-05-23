@@ -8,7 +8,12 @@ Looking for English README? [Click here](./README_EN.md)
 
 ### 1. 在 Zeabur 上部署
 
+### 2. 使用 docker compose
 
-## 即将退出
+使用 docker compose 部署，只需要将该仓库 clone 到本地，然后执行以下命令即可，然后根据需要修改 run.env 或者直接使用默认配置。
 
-- [ ] Docker Compose 版本
+```bash
+git clone https://github.com/enhanceai/self-deploy.git
+cd self-deploy
+docker-compose up --env-file run.env -d
+```

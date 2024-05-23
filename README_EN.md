@@ -8,6 +8,13 @@ Based on Docker's fast environment configuration and deployment, you can quickly
 
 ### 1. Deploy on Zeabur
 
-## Coming soon
 
-- [ ] Docker Compose version
+### 2. Use docker compose
+
+Deploy using docker compose, just clone this repository to your local machine, then execute the following command, and modify run.env as needed or use the default configuration directly.
+
+```bash
+git clone https://github.com/enhanceai/self-deploy.git
+cd self-deploy
+docker-compose up --env-file run.env -d
+```
