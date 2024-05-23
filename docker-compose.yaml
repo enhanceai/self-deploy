@@ -94,7 +94,7 @@ services:
     image: ghcr.io/enhanceai/official-site-enterprise:latest
     container_name: site
     expose:
-      - 8043
+      - 80
     networks:
       - private
       - site
@@ -160,7 +160,7 @@ services:
     environment:
       - API_HOST=api:20502
       - UPTIME_KUMA_HOST=uptime-kuma:3001
-      - SITE_HOST=site:8043
+      - SITE_HOST=site
       - ETCD_URL=http://etcd:2379
       - POSTGRES_HOST=enhance-db
       - POSTGRES_PORT=5432
