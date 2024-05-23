@@ -1,0 +1,184 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    expose:
+      - 6379
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:16.1
+    container_name: enhance-db
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - ./volumes/enhance-db:/var/lib/postgresql/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - path: ./run.env
+        required: true
+
+  mongo:
+    image: mongo:7.0.4
+    container_name: enhance-mongo
+    expose:
+      - 27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - ./volumes/mongo:/data/db
+      - ./volumes/mongo-config:/data/configdb
+    networks:
+      - private
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    env_file:
+      - path: ./run.env
+        required: true
+
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.10
+    container_name: etcd
+    expose:
+      - 2379
+      - 2380
+    volumes:
+      - ./volumes/enhance-etcd:/etcd-data
+    entrypoint: /usr/local/bin/etcd
+    command:
+      - "--data-dir=/etcd-data"
+      - "--name=node1"
+      - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+      - "--listen-peer-urls=http://0.0.0.0:2380"
+      - "--advertise-client-urls=http://0.0.0.0:2379"
+      - "--listen-client-urls=http://0.0.0.0:2379"
+      - "--initial-cluster=node1=http://0.0.0.0:2380"
+    networks:
+      - private
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    expose:
+      - 3001
+    volumes:
+      - ./volumes/uptime-kuma:/app/data
+    networks:
+      - private
+      - site
+
+  official-site:
+    image: ghcr.io/enhanceai/official-site-enterprise:latest
+    container_name: site
+    expose:
+      - 8043
+    networks:
+      - private
+      - site
+
+  enhance-server:
+    image: ghcr.io/enhanceai/enhance-server:1.0
+    container_name: server
+    expose:
+      - 3000
+    networks:
+      - private
+    depends_on:
+      - etcd
+
+  enhance-api:
+    image: ghcr.io/enhanceai/enhance-api-enterprise:latest
+    container_name: api
+    expose:
+      - 20502
+    networks:
+      - private
+      - site
+    environment:
+      - CORE_SERVICE_HOST=http://server:3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=enhance-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - ETCD_URL=http://etcd:2379
+      - MONGODB_URI=mongodb://enhance-mongo:27017
+      - MONGODB_USER=${MONGODB_USER}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+
+  # enhance-admin:
+  #   image: enhance-admin:latest
+  #   container_name: enhance-admin
+  #   expose:
+  #     - 8080
+  #   networks:
+  #     - private
+  #     - site
+  #   depends_on:
+  #     - enhance-api
+
+  gateway:
+    image: ghcr.io/enhanceai/gateway:latest
+    container_name: gateway
+    ports:
+      - "80:80"
+    networks:
+      - site
+      - private
+    environment:
+      - API_HOST=api:20502
+      - UPTIME_KUMA_HOST=uptime-kuma:3001
+      - SITE_HOST=site:8043
+      - ETCD_URL=http://etcd:2379
+      - POSTGRES_HOST=enhance-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - APP_DOMAIN=host.docker.internal
+    depends_on:
+      - official-site
+      - enhance-api
+      - enhance-server
+      - uptime-kuma
+      - etcd
+      - db
+      - redis
+
+networks:
+  private:
+    driver: bridge
+  site:
+    driver: bridge

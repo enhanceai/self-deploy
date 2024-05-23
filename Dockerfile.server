@@ -1,7 +1,0 @@
-FROM ghcr.io/enhanceai/enhance-server:1.0
-
-ARG ETCD_HOST
-ENV ETCD_URL=${ETCD_HOST}:2379
-
-ENV PORT=3000
-EXPOSE 3000
