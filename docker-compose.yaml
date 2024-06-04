@@ -99,7 +99,7 @@ services:
       - site
 
   official-site:
-    image: ghcr.io/enhanceai/official-site-enterprise:latest
+    image: ghcr.io/enhanceai/official-site-enterprise:1.2.1
     container_name: site
     expose:
       - 80
@@ -108,19 +108,19 @@ services:
       - site
 
   enhance-server:
-    image: ghcr.io/enhanceai/enhance-server:1.0
+    image: ghcr.io/enhanceai/enhance-server-enterprise:1.1.0
     container_name: server
     expose:
       - 3000
     networks:
       - private
     environment:
-      - ETCD_URL=host.docker.internal:2379
+      - ETCD_URL=http://etcd:2379
     depends_on:
       - etcd
 
   enhance-api:
-    image: ghcr.io/enhanceai/enhance-api-enterprise:latest
+    image: ghcr.io/enhanceai/enhance-api-enterprise:1.2.0
     container_name: api
     expose:
       - 20502
@@ -160,7 +160,7 @@ services:
   #     - enhance-api
 
   gateway:
-    image: ghcr.io/enhanceai/gateway:latest
+    image: ghcr.io/enhanceai/gateway:1.1.5
     container_name: gateway
     ports:
       - "52033:80"
