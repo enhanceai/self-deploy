@@ -163,7 +163,7 @@ services:
     image: ghcr.io/enhanceai/gateway:1.1.5
     container_name: gateway
     ports:
-      - "52033:80"
+      - "80:80"
     networks:
       - site
       - private
