@@ -8,6 +8,8 @@ services:
       - 6379
     networks:
       - private
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 5s
@@ -27,6 +29,8 @@ services:
       - ./volumes/enhance-db:/var/lib/postgresql/data
     networks:
       - private
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -49,6 +53,8 @@ services:
       - ./volumes/mongo-config:/data/configdb
     networks:
       - private
+    ports:
+      - "27017:27017"
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
@@ -65,6 +71,8 @@ services:
     expose:
       - 2379
       - 2380
+    ports:
+      - "2379:2379"
     volumes:
       - ./volumes/enhance-etcd:/etcd-data
     entrypoint: /usr/local/bin/etcd
@@ -106,6 +114,8 @@ services:
       - 3000
     networks:
       - private
+    environment:
+      - ETCD_URL=host.docker.internal:2379
     depends_on:
       - etcd
 
@@ -153,7 +163,7 @@ services:
     image: ghcr.io/enhanceai/gateway:latest
     container_name: gateway
     ports:
-      - "80:80"
+      - "52033:80"
     networks:
       - site
       - private

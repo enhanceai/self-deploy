@@ -16,5 +16,5 @@ Deploy using docker compose, just clone this repository to your local machine, t
 ```bash
 git clone https://github.com/enhanceai/self-deploy.git
 cd self-deploy
-docker-compose up --env-file run.env -d
+docker compose --env-file run.env up -d
 ```

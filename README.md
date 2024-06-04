@@ -15,5 +15,5 @@ Looking for English README? [Click here](./README_EN.md)
 ```bash
 git clone https://github.com/enhanceai/self-deploy.git
 cd self-deploy
-docker-compose up --env-file run.env -d
+docker compose --env-file run.env up -d
 ```
