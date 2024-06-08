@@ -148,16 +148,26 @@ services:
       mongo:
         condition: service_healthy
 
-  # enhance-admin:
-  #   image: enhance-admin:latest
-  #   container_name: enhance-admin
-  #   expose:
-  #     - 8080
-  #   networks:
-  #     - private
-  #     - site
-  #   depends_on:
-  #     - enhance-api
+  enhance-admin:
+    image: ghcr.io/enhanceai/enhance-admin-enterprise:latest
+    container_name: enhance-admin
+    expose:
+      - 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - private
+      - site
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@enhance-db:5432/${DATABASE_NAME}
+      - ETCD_URL=http://etcd:2379
+      - MONGODB_URI=mongodb://enhance-mongo:27017
+      - MONGODB_USER=${MONGODB_USER}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      - PORTAL_SITE=http://localhost/
+      - NEXTAUTH_URL=http://localhost:8080/
+    depends_on:
+      - enhance-api
 
   gateway:
     image: ghcr.io/enhanceai/gateway:1.1.5
