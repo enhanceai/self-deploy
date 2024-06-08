@@ -17,3 +17,5 @@ git clone https://github.com/enhanceai/self-deploy.git
 cd self-deploy
 docker compose --env-file run.env up -d
 ```
+
+最后，访问 http://localhost/ 即可访问部署的 AI 助手官网，访问 http://localhost:8080/ 即可访问部署的 AI 助手后台管理系统。
