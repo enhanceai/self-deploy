@@ -92,6 +92,8 @@ services:
     container_name: uptime-kuma
     expose:
       - 3001
+    ports:
+      - "3001:3001"
     volumes:
       - ./volumes/uptime-kuma:/app/data
     networks:
@@ -103,6 +105,8 @@ services:
     container_name: site
     expose:
       - 80
+    ports:
+      - "4321:80"
     networks:
       - private
       - site
@@ -112,6 +116,8 @@ services:
     container_name: server
     expose:
       - 3000
+    ports:
+      - "3000:3000"
     networks:
       - private
     environment:
@@ -127,6 +133,8 @@ services:
     networks:
       - private
       - site
+    ports:
+      - "20502:20502"
     environment:
       - CORE_SERVICE_HOST=http://server:3000
       - REDIS_HOST=redis
