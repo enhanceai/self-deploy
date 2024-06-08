@@ -18,3 +18,5 @@ git clone https://github.com/enhanceai/self-deploy.git
 cd self-deploy
 docker compose --env-file run.env up -d
 ```
+
+Finally, visit http://localhost/ to access the deployed AI assistant website, and visit http://localhost:8080/ to access the deployed AI assistant background management system.
