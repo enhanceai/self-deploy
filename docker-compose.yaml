@@ -178,7 +178,7 @@ services:
       - enhance-api
 
   gateway:
-    image: ghcr.io/enhanceai/gateway:1.1.5
+    image: ghcr.io/enhanceai/gateway:1.2.0
     container_name: gateway
     ports:
       - "80:80"

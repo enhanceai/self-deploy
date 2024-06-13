@@ -2,3 +2,4 @@ secret/
 .vscode/
 volumes/*
 !volumes/.gitkeep
+backup/
