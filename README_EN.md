@@ -8,6 +8,11 @@ Based on Docker's fast environment configuration and deployment, you can quickly
 
 ### 1. Deploy on Zeabur
 
+To deploy the AI assistant system on Zeabur, just click the button below.
+
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/3HCGYO?referralCode=jctaoo)
+
+> Note: Do not select the Shanghai region unless you have a domain name that has already been filed with the IPC. Services deployed in this region will not be able to access OpenAI, Google, and Anthropic services.
 
 ### 2. Use docker compose
 
