@@ -1,1 +1,0 @@
-FROM ghcr.io/enhanceai/official-site-enterprise:1.2.1

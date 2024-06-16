@@ -1,0 +1,329 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: assismeta
+spec:
+  description: A template for creating a full-stack AI assistant system.
+  icon: https://assismeta.com/favicon.svg
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: 域名
+      description: 你想为你的 Assismeta 网站使用的域名是什么？
+    - key: ADMIN_DOMAIN
+      type: DOMAIN
+      name: 管理面板域名
+      description: 你想为你的 Assismeta 管理面板使用的域名是什么？
+  tags:
+    - api
+    - ai
+    - bot
+  readme: |
+    基于 Zeabur 的云环境，快速为你的企业或者团队搭建一个 AI 助手系统，掌握所有的数据和信息！
+  services:
+    - name: redis
+      template: PREBUILT
+      spec:
+        id: redis
+        name: redis
+        description: null
+        icon: https://service-icons.zeabur.com/marketplace/redis.svg
+        source:
+          image: redis:7.2.4
+        ports:
+          - id: database
+            port: 6379
+            type: TCP
+        env:
+          REDIS_PORT:
+            default: "${DATABASE_PORT}"
+            expose: true
+            readonly: true
+
+    - name: etcd
+      template: PREBUILT
+      spec:
+        id: etcd
+        name: etcd
+        description: null
+        icon: https://i.imgur.com/jyDr9hI.png
+        source:
+          image: quay.io/coreos/etcd:v3.5.10
+          command:
+            - etcd
+            - --config-file
+            - /etc/etcd/etcd.yml
+        ports:
+          - id: client
+            port: 2379
+            type: TCP
+          - id: peer
+            port: 2380
+            type: TCP
+        volumes:
+          - id: data
+            dir: /etcd-data
+        env:
+          ALLOW_NONE_AUTHENTICATION:
+            default: "yes"
+        configs:
+          - path: /etc/etcd/etcd.yml
+            template: |
+              name: 'etcd0'
+              data-dir: '/etcd-data'
+              listen-client-urls: 'http://0.0.0.0:2379'
+              advertise-client-urls: 'http://0.0.0.0:2379'
+              listen-peer-urls: 'http://0.0.0.0:2380'
+              initial-advertise-peer-urls: 'http://0.0.0.0:2380'
+              initial-cluster: 'etcd0=http://0.0.0.0:2380'
+              initial-cluster-token: 'etcd-cluster-1'
+              initial-cluster-state: 'new'
+
+    - name: database
+      template: PREBUILT
+      spec:
+        id: database
+        name: database
+        description: null
+        icon: https://service-icons.zeabur.com/marketplace/postgresql.svg
+        source:
+          image: postgres:16.1
+        ports:
+          - id: database
+            port: 5432
+            type: TCP
+        volumes:
+          - id: data
+            dir: /var/lib/postgresql/data/pgdata
+        instructions:
+          - type: TEXT
+            title: 连接数据库的 URL
+            content: jdbc:postgresql://${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}
+          - type: TEXT
+            title: 数据库用户名
+            content: ${POSTGRES_USER}
+            category: Credentials
+          - type: PASSWORD
+            title: 数据库密码
+            content: ${POSTGRES_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: 数据库名称
+            content: ${POSTGRES_DB}
+            category: Credentials
+          - type: TEXT
+            title: 数据库 Host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: 数据库端口
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          POSTGRES_USER:
+            default: "zeabur"
+            readonly: true
+            expose: true
+          POSTGRES_PASSWORD:
+            default: "${PASSWORD}"
+            expose: true
+            readonly: true
+          POSTGRES_DB:
+            default: "enhance"
+            expose: true
+            readonly: true
+          POSTGRES_PORT:
+            default: "${DATABASE_PORT}"
+            expose: true
+            readonly: true
+          PGDATA:
+            default: "/var/lib/postgresql/data/pgdata"
+            readonly: true
+
+    - name: mongo
+      template: PREBUILT
+      spec:
+        id: mongo
+        name: mongo
+        description: null
+        icon: https://service-icons.zeabur.com/marketplace/mongodb.svg
+        source:
+          image: mongo:7.0
+          command:
+            - sh
+          args:
+            - -c
+            - sed -i '10,23d' /usr/local/bin/docker-entrypoint.sh && exec docker-entrypoint.sh mongod
+        ports:
+          - id: database
+            port: 27017
+            type: TCP
+        volumes:
+          - id: data
+            dir: /data/db
+          - id: config
+            dir: /data/configdb
+        instructions:
+          - type: TEXT
+            title: 连接数据库的 URL
+            content: jdbc:mongodb://${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/chat?user=${MONGODB_USER}&password=${MONGO_PASSWORD}
+          - type: TEXT
+            title: 数据库用户名
+            content: ${MONGODB_USER}
+            category: Credentials
+          - type: PASSWORD
+            title: 数据库密码
+            content: ${MONGO_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: 数据库 Host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: 数据库端口
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          MONGO_INITDB_ROOT_USERNAME:
+            default: "zeabur"
+            readonly: true
+          MONGO_INITDB_ROOT_PASSWORD:
+            default: "${PASSWORD}"
+            readonly: true
+          MONGO_PASSWORD:
+            default: "${MONGO_INITDB_ROOT_PASSWORD}"
+            expose: true
+            readonly: true
+          MONGO_PORT:
+            default: "${DATABASE_PORT}"
+            expose: true
+            readonly: true
+          MONGODB_USER:
+            default: "${MONGO_INITDB_ROOT_USERNAME}"
+            expose: true
+            readonly: true
+
+    - name: uptime-kuma
+      template: PREBUILT
+      spec:
+        id: uptime-kuma
+        name: uptime-kuma
+        description: null
+        icon: https://github.com/louislam/uptime-kuma/raw/master/public/icon.svg
+        source:
+          image: louislam/uptime-kuma:1
+        ports:
+          - id: web
+            port: 3001
+            type: TCP
+        env:
+          UPTIME_KUMA_PORT:
+            default: "${WEB_PORT}"
+            expose: true
+            readonly: true
+
+    - name: official-site
+      template: PREBUILT
+      spec:
+        id: official-site
+        name: official-site
+        description: null
+        icon: https://assismeta.com/favicon.svg
+        source:
+          image: ghcr.io/enhanceai/official-site-enterprise:latest
+        ports:
+          - id: web
+            port: 80
+            type: TCP
+
+    - name: enhance-server
+      template: PREBUILT
+      spec:
+        id: enhance-server
+        name: enhance-server
+        description: null
+        icon: https://assismeta.com/favicon.svg
+        source:
+          image: ghcr.io/enhanceai/enhance-server-enterprise:latest
+        ports:
+          - id: web
+            port: 3000
+            type: TCP
+        env:
+          ETCD_URL:
+            default: "http://etcd.zeabur.internal:2379"
+            expose: true
+            readonly: true
+
+    - name: enhance-api
+      template: PREBUILT
+      spec:
+        id: enhance-api
+        name: enhance-api
+        description: null
+        icon: https://assismeta.com/favicon.svg
+        source:
+          image: ghcr.io/enhanceai/enhance-api-enterprise:latest
+        ports:
+          - id: web
+            port: 20502
+            type: TCP
+        env:
+          CORE_SERVICE_HOST:
+            default: "http://server.zeabur.internal:3000"
+            readonly: true
+          POSTGRES_HOST:
+            default: "database.zeabur.internal"
+            readonly: true
+          DATABASE_NAME:
+            default: "${POSTGRES_DB}"
+            readonly: true
+          ETCD_URL:
+            default: "http://etcd.zeabur.internal:2379"
+            readonly: true
+          MONGODB_URI:
+            default: "mongodb://mongo.zeabur.internal:${MONGO_PORT}"
+            readonly: true
+          MONGODB_USER:
+            default: "${MONGODB_USER}"
+            readonly: true
+          MONGODB_PASSWORD:
+            default: "${MONGO_PASSWORD}"
+            readonly: true
+
+    - name: enhance-admin
+      template: PREBUILT
+      spec:
+        id: enhance-admin
+        name: enhance-admin
+        description: null
+        icon: https://assismeta.com/favicon.svg
+        source:
+          image: ghcr.io/enhanceai/enhance-admin-enterprise:latest
+        ports:
+          - id: web
+            port: 8080
+            type: TCP
+        env:
+          DATABASE_URL:
+            default: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database.zeabur.internal:${POSTGRES_PORT}/${POSTGRES_DB}"
+            readonly: true
+          ETCD_URL:
+            default: "http://etcd.zeabur.internal:2379"
+            readonly: true
+          MONGODB_URI:
+            default: "mongodb://mongo.zeabur.internal:${MONGO_PORT}"
+            readonly: true
+          MONGODB_USER:
+            default: "${MONGODB_USER}"
+            readonly: true
+          MONGODB_PASSWORD:
+            default: "${MONGO_PASSWORD}"
+            readonly: true
+          PORTAL_SITE:
+            default: "https://${PUBLIC_DOMAIN}.zeabur.app"
+          NEXT_AUTH_URL:
+            default: "${ZEABUR_WEB_URL}"
+            readonly: true
+      domainKey: ADMIN_DOMAIN
+

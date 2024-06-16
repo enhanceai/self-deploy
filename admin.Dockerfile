@@ -1,1 +1,0 @@
-FROM ghcr.io/enhanceai/enhance-admin-enterprise:latest

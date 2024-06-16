@@ -3,3 +3,4 @@ secret/
 volumes/*
 !volumes/.gitkeep
 backup/
+.idea

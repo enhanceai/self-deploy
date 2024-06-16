@@ -1,1 +1,0 @@
-FROM ghcr.io/enhanceai/enhance-api-enterprise:1.2.0
