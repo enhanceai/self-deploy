@@ -166,14 +166,14 @@ spec:
         instructions:
           - type: TEXT
             title: 连接数据库的 URL
-            content: jdbc:mongodb://${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/chat?user=${MONGODB_USER}&password=${MONGO_PASSWORD}
+            content: jdbc:mongodb://${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/chat?user=${MONGODB_USER}&password=${MONGODB_PASSWORD}
           - type: TEXT
             title: 数据库用户名
             content: ${MONGODB_USER}
             category: Credentials
           - type: PASSWORD
             title: 数据库密码
-            content: ${MONGO_PASSWORD}
+            content: ${MONGODB_PASSWORD}
             category: Credentials
           - type: TEXT
             title: 数据库 Host
@@ -190,7 +190,7 @@ spec:
           MONGO_INITDB_ROOT_PASSWORD:
             default: "${PASSWORD}"
             readonly: true
-          MONGO_PASSWORD:
+          MONGODB_PASSWORD:
             default: "${MONGO_INITDB_ROOT_PASSWORD}"
             expose: true
             readonly: true
@@ -270,7 +270,7 @@ spec:
             type: HTTP
         env:
           CORE_SERVICE_HOST:
-            default: "http://server.zeabur.internal:3000"
+            default: "http://enhance-server.zeabur.internal:3000"
             readonly: true
           POSTGRES_HOST:
             default: "database.zeabur.internal"
@@ -283,12 +283,6 @@ spec:
             readonly: true
           MONGODB_URI:
             default: "mongodb://mongo.zeabur.internal:${MONGO_PORT}"
-            readonly: true
-          MONGODB_USER:
-            default: "${MONGODB_USER}"
-            readonly: true
-          MONGODB_PASSWORD:
-            default: "${MONGO_PASSWORD}"
             readonly: true
 
     - name: enhance-admin
@@ -314,15 +308,9 @@ spec:
           MONGODB_URI:
             default: "mongodb://mongo.zeabur.internal:${MONGO_PORT}"
             readonly: true
-          MONGODB_USER:
-            default: "${MONGODB_USER}"
-            readonly: true
-          MONGODB_PASSWORD:
-            default: "${MONGO_PASSWORD}"
-            readonly: true
           PORTAL_SITE:
             default: "https://${PUBLIC_DOMAIN}.zeabur.app"
-          NEXT_AUTH_URL:
+          NEXTAUTH_URL:
             default: "${ZEABUR_WEB_URL}"
             readonly: true
       domainKey: ADMIN_DOMAIN
@@ -349,9 +337,6 @@ spec:
             readonly: true
           POSTGRES_HOST:
             default: "database.zeabur.internal"
-            readonly: true
-          POSTGRES_USER:
-            default: "${POSTGRES_USER}"
             readonly: true
           DATABASE_NAME:
             default: "${POSTGRES_DB}"
