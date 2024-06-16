@@ -4,7 +4,7 @@ metadata:
   name: assismeta
 spec:
   description: A template for creating a full-stack AI assistant system.
-  icon: https://assismeta.com/favicon.svg
+  icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
   variables:
     - key: PUBLIC_DOMAIN
       type: DOMAIN
@@ -228,7 +228,7 @@ spec:
         id: official-site
         name: official-site
         description: null
-        icon: https://assismeta.com/favicon.svg
+        icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
         source:
           image: ghcr.io/enhanceai/official-site-enterprise:latest
         ports:
@@ -242,13 +242,13 @@ spec:
         id: enhance-server
         name: enhance-server
         description: null
-        icon: https://assismeta.com/favicon.svg
+        icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
         source:
           image: ghcr.io/enhanceai/enhance-server-enterprise:latest
         ports:
           - id: web
             port: 3000
-            type: TCP
+            type: HTTP
         env:
           ETCD_URL:
             default: "http://etcd.zeabur.internal:2379"
@@ -261,13 +261,13 @@ spec:
         id: enhance-api
         name: enhance-api
         description: null
-        icon: https://assismeta.com/favicon.svg
+        icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
         source:
           image: ghcr.io/enhanceai/enhance-api-enterprise:latest
         ports:
           - id: web
             port: 20502
-            type: TCP
+            type: HTTP
         env:
           CORE_SERVICE_HOST:
             default: "http://server.zeabur.internal:3000"
@@ -297,13 +297,13 @@ spec:
         id: enhance-admin
         name: enhance-admin
         description: null
-        icon: https://assismeta.com/favicon.svg
+        icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
         source:
           image: ghcr.io/enhanceai/enhance-admin-enterprise:latest
         ports:
           - id: web
             port: 8080
-            type: TCP
+            type: HTTP
         env:
           DATABASE_URL:
             default: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database.zeabur.internal:${POSTGRES_PORT}/${POSTGRES_DB}"
@@ -326,4 +326,44 @@ spec:
             default: "${ZEABUR_WEB_URL}"
             readonly: true
       domainKey: ADMIN_DOMAIN
+
+    - name: gateway
+      template: PREBUILT
+      spec:
+        id: gateway
+        name: gateway
+        description: null
+        icon: https://raw.githubusercontent.com/enhanceai/self-deploy/main/favicon.svg
+        source:
+          image: ghcr.io/enhanceai/gateway:latest
+        ports:
+          - id: web
+            port: 80
+            type: HTTP
+        env:
+          APP_DOMAIN:
+            default: "${ZEABUR_WEB_DOMAIN}"
+            readonly: true
+          ETCD_URL:
+            default: "http://etcd.zeabur.internal:2379"
+            readonly: true
+          POSTGRES_HOST:
+            default: "database.zeabur.internal"
+            readonly: true
+          POSTGRES_USER:
+            default: "${POSTGRES_USER}"
+            readonly: true
+          DATABASE_NAME:
+            default: "${POSTGRES_DB}"
+            readonly: true
+          API_HOST:
+            default: "enhance-api.zeabur.internal:20502"
+            readonly: true
+          UPTIME_KUMA_HOST:
+            default: "uptime-kuma.zeabur.internal:3001"
+            readonly: true
+          SITE_HOST:
+            default: "official-site.zeabur.internal"
+            readonly: true
+      domainKey: PUBLIC_DOMAIN
 
